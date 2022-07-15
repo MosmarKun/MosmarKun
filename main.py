@@ -7,7 +7,7 @@ c = conn.cursor()
 app = FastAPI()
 users = {}
 
-@app.post("/registerNewUser")
+@app.get("/registerNewUser")
 def registerNewUser(name,age,gender,major):
     c.execute("insert into users values (?,?,?,?)",(name,age,gender,major))
     print("values should be added successfully!")
