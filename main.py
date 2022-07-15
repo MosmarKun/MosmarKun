@@ -1,6 +1,7 @@
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 import sqlite3
+import sqlalchemy
 
 class User(BaseModel):
     name:str
@@ -8,17 +9,12 @@ class User(BaseModel):
     gender:str
     major:str
 users = {}
-x = 0
-for user in dbUsers:
-    users[dbUsers[x][0]] = {"name":dbUsers[x][1],"age":dbUsers[x][2],"gender":dbUsers[x][3],"major":dbUsers[x][4]}
-    x = x + 1
 
 
 app = FastAPI()
 
 @app.get("/getUsers")
 def getUsers():
-    print(dbUsers)
     return users
 
 @app.get("/getUserById/{userId}")
@@ -39,5 +35,5 @@ def registerNewUser(user:User):
     return users
     
 @app.delete("/deleteUserById")
-def deleteUser(userId:int):  
+def deleteUser(userId:int):
     return users
