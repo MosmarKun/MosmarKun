@@ -4,22 +4,8 @@ import sqlite3
 
 
 conn = sqlite3.connect('User.db',check_same_thread=False)
-c = conn.cursor()
-c.execute("select rowid,* from users")
-dbUsers = c.fetchall()
-class User(BaseModel):
-    name:str
-    age:int
-    gender:str
-    major:str
-users = {}
-x = 0
-for user in dbUsers:
-    users[dbUsers[x][0]] = {"name":dbUsers[x][1],"age":dbUsers[x][2],"gender":dbUsers[x][3],"major":dbUsers[x][4]}
-    x = x + 1
-
-
 app = FastAPI()
+
 
 @app.get("/getUsers")
 def getUsers():
