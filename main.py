@@ -1,59 +1,53 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
-import pyodbc
+import sqlite3
 
-app = FastAPI()
-conn = pyodbc.connect(
-    "Driver={SQL Server Native Client 11.0};"
-    "Server=(LocalDB)\MSSQLLocalDB;"
-    "Database=Test;"
-    "Trusted_Connection=yes;"
-)
-x = 0
-y = 0
-Go = 0
-cursor = conn.cursor()
-cursor.execute("Select * from Users")
-usersDB = cursor.fetchall()
+
+conn = sqlite3.connect('User.db',check_same_thread=False)
+c = conn.cursor()
+c.execute("select rowid,* from users")
+dbUsers = c.fetchall()
+class User(BaseModel):
+    name:str
+    age:int
+    gender:str
+    major:str
 users = {}
-cursor.commit()
-
-for row in usersDB:
-    users[x] = {"Username": usersDB[x][0], "Password": usersDB[x][1]}
+x = 0
+for user in dbUsers:
+    users[dbUsers[x][0]] = {"name":dbUsers[x][1],"age":dbUsers[x][2],"gender":dbUsers[x][3],"major":dbUsers[x][4]}
     x = x + 1
 
 
-def Insert(username, password):
-        cursor.execute('Insert into Users values(?,?);',
-                      (username, password))
-        cursor.commit()
-
-
-def GetUser(name):
-    cursor.execute('Select * from Users where name = ?;',
-                   (name))
-    for row in cursor:
-        print(f'row={row}')
-    cursor.commit()
-
+app = FastAPI()
 
 @app.get("/getUsers")
-def GetUsers():
+def getUsers():
+    print(dbUsers)
     return users
 
+@app.get("/getUserById/{userId}")
+def getUser(userId:int):
+    return users[userId]
+
+@app.get("/getUserByName/{userName}")
+def getUser(userName:str):
+    for userId in users:
+        if users[userId]["name"] == userName:
+            return users[userId]
+    raise HTTPException.Http404
 
 @app.post("/registerNewUser")
-def registerNewUser(username, password):
-    for row in users:
-        if (users[row]['Username'] == username):
-            raise HTTPException(status_code=404, detail='Username is taken')
-            return 'Bad'
-    Insert(username, password)
-    users[len(users)+1] = {"Username": username, "Password": password}
-    return users[len(users)]
+def registerNewUser(user:User):
+    users[len(users) + 1] = user
+    c.execute("insert into users values (?,?,?,?)",(user.name,user.age,user.gender,user.major))
+    print("values should be added successfully!")
+    return users
 
+@app.delete("/deleteUserById")
+def deleteUser(userId:int):
+    c.execute("delete from users where rowid = 2")
+    c.execute("select rowId,* from users")
+    users = c.fetchall()
 
-
-@app.get("/getUser")
-def getUser(name):
-        GetUser(name)
+    return users
