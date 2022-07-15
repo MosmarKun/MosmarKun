@@ -3,7 +3,6 @@ from pydantic import BaseModel
 import sqlite3
 
 
-conn = sqlite3.connect('User.db',check_same_thread=False)
 app = FastAPI()
 
 
