@@ -2,30 +2,13 @@ from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 import sqlite3
 
-
+conn = sqlite3.connect('User.db',check_same_thread=False)
+c = conn.cursor()
 app = FastAPI()
+users = {}
 
-
-@app.get("/getUsers")
-def getUsers():
-    print(dbUsers)
-    return users
-
-@app.get("/getUserById/{userId}")
-def getUser(userId:int):
-    return users[userId]
-
-@app.get("/getUserByName/{userName}")
-def getUser(userName:str):
-    for userId in users:
-        if users[userId]["name"] == userName:
-            return users[userId]
-    raise HTTPException.Http404
-
-@app.delete("/deleteUserById")
-def deleteUser(userId:int):
-    c.execute("delete from users where rowid = 2")
-    c.execute("select rowId,* from users")
-    users = c.fetchall()
-
-    return users
+@app.post("/registerNewUser")
+def registerNewUser(name,age,gender,major):
+    c.execute("insert into users values (?,?,?,?)",(name,age,gender,major))
+    print("values should be added successfully!")
+    return name + ' Has been created'
