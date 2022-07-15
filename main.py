@@ -22,13 +22,6 @@ def getUser(userName:str):
             return users[userId]
     raise HTTPException.Http404
 
-@app.post("/registerNewUser")
-def registerNewUser(user:User):
-    users[len(users) + 1] = user
-    c.execute("insert into users values (?,?,?,?)",(user.name,user.age,user.gender,user.major))
-    print("values should be added successfully!")
-    return users
-
 @app.delete("/deleteUserById")
 def deleteUser(userId:int):
     c.execute("delete from users where rowid = 2")
